@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Webinar Ketenagakerjaan | Pendaftaran & Kehadiran</title>
+  <meta name="description" content="Website profesional untuk pendaftaran peserta dan daftar hadir webinar ketenagakerjaan berbasis Google Spreadsheet dan Google Apps Script API." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #07111f;
+      --bg-soft: #0c1a2d;
+      --bg-card: rgba(255, 255, 255, 0.94);
+      --bg-card-soft: rgba(248, 250, 253, 0.92);
+      --bg-dark-card: rgba(255,255,255,0.08);
+      --stroke: rgba(255, 255, 255, 0.12);
+      --stroke-soft: rgba(22, 46, 84, 0.10);
+      --text: #122033;
+      --muted: #65758b;
+      --white: #ffffff;
+      --primary: #1f5eff;
+      --primary-dark: #12347a;
+      --primary-deep: #0b2356;
+      --accent: #2ec5a7;
+      --success-bg: rgba(36, 200, 165, 0.14);
+      --success-text: #0f8f73;
+      --danger-bg: rgba(220, 76, 100, 0.12);
+      --danger-text: #c53c56;
+      --shadow-xl: 0 30px 80px rgba(7, 17, 31, 0.20);
+      --shadow-lg: 0 22px 54px rgba(11, 30, 58, 0.12);
+      --shadow-md: 0 16px 36px rgba(11, 30, 58, 0.08);
+      --radius-xl: 32px;
+      --radius-lg: 24px;
+      --radius-md: 18px;
+      --radius-sm: 14px;
+      --container: 1160px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', Arial, Helvetica, sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(53, 110, 255, 0.18), transparent 24%),
+        radial-gradient(circle at top right, rgba(46, 197, 167, 0.12), transparent 20%),
+        linear-gradient(180deg, #07111f 0%, #0b1730 30%, #eef3f9 30%, #f5f8fc 100%);
+    }
+
+    body::before,
+    body::after {
+      content: '';
+      position: fixed;
+      border-radius: 999px;
+      filter: blur(70px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.35;
+    }
+
+    body::before {
+      width: 300px;
+      height: 300px;
+      left: -100px;
+      top: -80px;
+      background: rgba(64, 124, 255, 0.28);
+    }
+
+    body::after {
+      width: 360px;
+      height: 360px;
+      right: -120px;
+      top: 120px;
+      background: rgba(46, 197, 167, 0.16);
+    }
+
+    .container {
+      width: min(var(--container), calc(100% - 32px));
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 28px 0 124px;
+      color: var(--white);
+      background:
+        linear-gradient(135deg, #07111f 0%, #0b1730 38%, #12347a 100%);
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 15% 18%, rgba(255,255,255,0.10), transparent 18%),
+        radial-gradient(circle at 84% 16%, rgba(46,197,167,0.14), transparent 16%),
+        linear-gradient(180deg, rgba(255,255,255,0.04), transparent 30%, rgba(255,255,255,0.02));
+      pointer-events: none;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding-bottom: 32px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(14px);
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+
+    .brand-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6ee7d6, #76a8ff);
+      box-shadow: 0 0 16px rgba(110, 231, 214, 0.88);
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 800;
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.08);
+      letter-spacing: 0.02em;
+    }
+
+    .status::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 12px currentColor;
+    }
+
+    .status.waiting { color: #ffd977; }
+    .status.online { color: #7cf7d5; }
+    .status.offline { color: #ff9cab; }
+
+    .hero-wrap {
+      display: grid;
+      gap: 30px;
+      align-items: start;
+    }
+
+    .hero-copy {
+      max-width: 980px;
+    }
+
+    .hero-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      width: fit-content;
+      padding: 10px 16px;
+      margin-bottom: 22px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      backdrop-filter: blur(12px);
+    }
+
+    .hero-label::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7cf7d5, #4f8cff);
+      box-shadow: 0 0 12px rgba(124, 247, 213, 0.9);
+    }
+
+    .hero-title {
+      margin: 0;
+      font-size: clamp(34px, 5.2vw, 72px);
+      line-height: 1.04;
+      letter-spacing: -0.055em;
+      text-transform: uppercase;
+      text-wrap: balance;
+      text-shadow: 0 10px 28px rgba(6, 14, 28, 0.28);
+      max-width: 1000px;
+    }
+
+    .hero-info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 28px;
+      max-width: 900px;
+    }
+
+    .hero-info-card {
+      position: relative;
+      overflow: hidden;
+      padding: 22px 24px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.13), rgba(255,255,255,0.08));
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: 0 20px 44px rgba(6, 17, 35, 0.18);
+      backdrop-filter: blur(18px);
+    }
+
+    .hero-info-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(145deg, rgba(255,255,255,0.08), transparent 52%);
+      pointer-events: none;
+    }
+
+    .hero-info-label {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.70);
+    }
+
+    .hero-info-value {
+      display: block;
+      font-size: clamp(20px, 2.3vw, 28px);
+      font-weight: 800;
+      line-height: 1.18;
+      letter-spacing: -0.03em;
+      color: var(--white);
+    }
+
+    .main-shell {
+      margin-top: -76px;
+      padding-bottom: 68px;
+    }
+
+    .form-shell {
+      position: relative;
+      overflow: hidden;
+      padding: 30px;
+      border-radius: 34px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.78), rgba(255,255,255,0.70));
+      border: 1px solid rgba(255,255,255,0.9);
+      box-shadow: var(--shadow-xl);
+      backdrop-filter: blur(24px);
+    }
+
+    .form-shell::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(53, 110, 255, 0.08), transparent 22%),
+        radial-gradient(circle at 92% 12%, rgba(46, 197, 167, 0.08), transparent 18%),
+        linear-gradient(180deg, rgba(255,255,255,0.36), rgba(255,255,255,0.16));
+      pointer-events: none;
+    }
+
+    .shell-head {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .shell-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .shell-copy h2 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 40px);
+      letter-spacing: -0.05em;
+      color: var(--primary-deep);
+    }
+
+    .shell-subtitle {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      width: fit-content;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(18, 52, 122, 0.06);
+      border: 1px solid rgba(18, 52, 122, 0.08);
+      color: #4f6480;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .flow-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.74);
+      border: 1px solid rgba(171, 191, 213, 0.28);
+      box-shadow: 0 16px 30px rgba(14, 31, 54, 0.08);
+      color: #597089;
+      font-size: 13px;
+      font-weight: 700;
+      transition: all 0.35s var(--ease);
+    }
+
+    .flow-status::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: 0.9;
+    }
+
+    .flow-status.is-success {
+      color: var(--success-text);
+      background: rgba(255,255,255,0.92);
+      box-shadow: 0 18px 34px rgba(36, 200, 165, 0.16);
+    }
+
+    .tab-switch {
+      position: relative;
+      display: inline-grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      padding: 8px;
+      min-width: min(100%, 420px);
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(228, 236, 248, 0.92), rgba(244, 247, 252, 0.96));
+      border: 1px solid rgba(195, 208, 228, 0.58);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.88),
+        0 18px 38px rgba(11, 25, 46, 0.10);
+      isolation: isolate;
+    }
+
+    .tab-btn {
+      position: relative;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border: none;
+      outline: none;
+      min-height: 56px;
+      padding: 14px 20px;
+      border-radius: 999px;
+      background: transparent;
+      color: #294464;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      transition: transform 0.45s var(--ease), color 0.35s var(--ease), box-shadow 0.45s var(--ease), background 0.35s var(--ease);
+      font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .tab-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(135deg, rgba(79, 140, 255, 0.08), rgba(46, 197, 167, 0.06));
+      opacity: 0;
+      transition: opacity 0.35s var(--ease);
+    }
+
+    .tab-btn:hover {
+      transform: translateY(-1px);
+      color: var(--primary-deep);
+    }
+
+    .tab-btn:hover::before {
+      opacity: 1;
+    }
+
+    .tab-btn.active {
+      color: var(--white);
+      background: linear-gradient(135deg, #0e2657 0%, #1f5eff 100%);
+      box-shadow: 0 18px 34px rgba(31, 94, 255, 0.28);
+    }
+
+    .tab-btn.active::before {
+      opacity: 0;
+    }
+
+    .tab-icon {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.9;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex: 0 0 auto;
+    }
+
+    .tab-content {
+      display: none;
+      position: relative;
+      z-index: 1;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeUp 0.45s var(--ease);
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.99);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .form-card {
+      position: relative;
+      overflow: hidden;
+      padding: 30px;
+      border-radius: 30px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(247,250,255,0.94));
+      border: 1px solid rgba(219, 230, 241, 0.92);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .form-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right, rgba(31, 94, 255, 0.06), transparent 26%);
+      pointer-events: none;
+    }
+
+    .card-top {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+
+    .card-title {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      width: fit-content;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(31, 94, 255, 0.10), rgba(46, 197, 167, 0.08));
+      color: var(--primary-deep);
+      border: 1px solid rgba(31, 94, 255, 0.10);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .card-badge svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.9;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .card-title h3 {
+      margin: 0;
+      font-size: clamp(24px, 3.2vw, 34px);
+      color: var(--primary-deep);
+      letter-spacing: -0.05em;
+      line-height: 1.04;
+    }
+
+    .event-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: flex-end;
+      align-self: center;
+    }
+
+    .event-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 48px;
+      padding: 12px 15px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(241,246,255,0.94));
+      border: 1px solid rgba(209, 223, 240, 0.92);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.95), 0 12px 26px rgba(15, 35, 66, 0.06);
+      transition: transform 0.45s var(--ease), box-shadow 0.45s var(--ease), border-color 0.45s var(--ease);
+    }
+
+    .event-pill:hover {
+      transform: translateY(-2px);
+      border-color: rgba(31, 94, 255, 0.24);
+      box-shadow: 0 16px 28px rgba(17, 42, 81, 0.08);
+    }
+
+    .event-icon {
+      width: 18px;
+      height: 18px;
+      stroke: #305b9b;
+      fill: none;
+      stroke-width: 1.9;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex: 0 0 auto;
+    }
+
+    .event-pill strong {
+      display: block;
+      font-size: 11px;
+      color: #69829a;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .event-pill span {
+      display: block;
+      color: #173255;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .form-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--primary-deep);
+      letter-spacing: -0.01em;
+    }
+
+    .label-icon {
+      width: 16px;
+      height: 16px;
+      stroke: #2f66e8;
+      fill: none;
+      stroke-width: 1.9;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex: 0 0 auto;
+    }
+
+    .field-hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: -2px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid rgba(132, 159, 187, 0.28);
+      border-radius: 18px;
+      padding: 16px 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(247,250,255,0.98) 100%);
+      color: var(--text);
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.3s var(--ease), box-shadow 0.35s var(--ease), transform 0.3s var(--ease), background 0.35s var(--ease);
+      font-family: inherit;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.96), 0 8px 18px rgba(16, 42, 86, 0.04);
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: #93a3b5;
+    }
+
+    input:hover,
+    select:hover,
+    textarea:hover {
+      border-color: rgba(31, 94, 255, 0.34);
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: rgba(31, 94, 255, 0.76);
+      background: #ffffff;
+      box-shadow: 0 0 0 4px rgba(31, 94, 255, 0.10), 0 14px 28px rgba(31, 94, 255, 0.08);
+      transform: translateY(-1px);
+    }
+
+    textarea {
+      min-height: 140px;
+      resize: vertical;
+    }
+
+    .submit-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .btn-primary {
+      position: relative;
+      overflow: hidden;
+      border: none;
+      min-height: 56px;
+      padding: 16px 24px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #0f2758 0%, #1f5eff 100%);
+      color: var(--white);
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      box-shadow: 0 18px 36px rgba(31, 94, 255, 0.24);
+      transition: transform 0.45s var(--ease), box-shadow 0.45s var(--ease), opacity 0.3s var(--ease);
+      font-family: inherit;
+      will-change: transform;
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      inset: 1px;
+      border-radius: inherit;
+      background: linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0));
+      pointer-events: none;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 24px 44px rgba(31, 94, 255, 0.28);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.76;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .secure-note {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .message {
+      border-radius: 20px;
+      padding: 16px 18px;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.75;
+      border: 1px solid transparent;
+      box-shadow: 0 14px 30px rgba(15, 30, 50, 0.06);
+      animation: fadeUp 0.35s var(--ease);
+    }
+
+    .message.success {
+      background: var(--success-bg);
+      color: var(--success-text);
+      border-color: rgba(36, 200, 165, 0.2);
+    }
+
+    .message.error {
+      background: var(--danger-bg);
+      color: var(--danger-text);
+      border-color: rgba(220, 76, 100, 0.18);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 1024px) {
+      .hero-info-grid,
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .event-pills {
+        justify-content: flex-start;
+      }
+
+      .main-shell {
+        margin-top: -56px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hero {
+        padding-bottom: 92px;
+      }
+
+      .topbar,
+      .shell-head,
+      .card-top {
+        align-items: stretch;
+      }
+
+      .tab-switch,
+      .flow-status {
+        width: 100%;
+      }
+
+      .tab-btn {
+        width: 100%;
+      }
+
+      .hero-title {
+        font-size: clamp(30px, 10vw, 46px);
+      }
+
+      .form-shell,
+      .form-card {
+        padding: 22px;
+      }
+
+      .shell-copy h2 {
+        font-size: 30px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .container {
+        width: min(var(--container), calc(100% - 20px));
+      }
+
+      .hero {
+        padding-top: 18px;
+        padding-bottom: 82px;
+      }
+
+      .brand,
+      .status,
+      .hero-label,
+      .shell-subtitle,
+      .flow-status,
+      .card-badge {
+        font-size: 11px;
+      }
+
+      .tab-btn {
+        min-height: 50px;
+        padding: 14px 16px;
+      }
+
+      .tab-switch {
+        min-width: 100%;
+      }
+
+      .form-shell,
+      .form-card {
+        padding: 18px;
+        border-radius: 24px;
+      }
+
+      .hero-info-card {
+        padding: 18px;
+        border-radius: 20px;
+      }
+
+      .form-grid {
+        gap: 16px;
+      }
+
+      input,
+      select,
+      textarea {
+        padding: 15px 14px;
+        font-size: 16px;
+      }
+
+      .event-pills {
+        width: 100%;
+        gap: 10px;
+      }
+
+      .event-pill {
+        width: 100%;
+      }
+
+      .submit-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
+</head>
+<body>
+  <svg class="sr-only" aria-hidden="true" focusable="false">
+    <symbol id="icon-user" viewBox="0 0 24 24">
+      <path d="M20 21a8 8 0 0 0-16 0"></path>
+      <circle cx="12" cy="7" r="4"></circle>
+    </symbol>
+    <symbol id="icon-building" viewBox="0 0 24 24">
+      <path d="M3 21h18"></path>
+      <path d="M5 21V7l7-4 7 4v14"></path>
+      <path d="M9 10h.01"></path>
+      <path d="M15 10h.01"></path>
+      <path d="M9 14h.01"></path>
+      <path d="M15 14h.01"></path>
+    </symbol>
+    <symbol id="icon-briefcase" viewBox="0 0 24 24">
+      <rect x="3" y="7" width="18" height="13" rx="2"></rect>
+      <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+      <path d="M3 12h18"></path>
+    </symbol>
+    <symbol id="icon-map" viewBox="0 0 24 24">
+      <path d="M9 18l-6 3V6l6-3 6 3 6-3v15l-6 3-6-3z"></path>
+      <path d="M9 3v15"></path>
+      <path d="M15 6v15"></path>
+    </symbol>
+    <symbol id="icon-phone" viewBox="0 0 24 24">
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 3.08 5.18 2 2 0 0 1 5.06 3h3a2 2 0 0 1 2 1.72l.34 2.72a2 2 0 0 1-.57 1.73l-1.6 1.6a16 16 0 0 0 5.17 5.17l1.6-1.6a2 2 0 0 1 1.73-.57l2.72.34A2 2 0 0 1 22 16.92z"></path>
+    </symbol>
+    <symbol id="icon-mail" viewBox="0 0 24 24">
+      <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+      <path d="m3 7 9 6 9-6"></path>
+    </symbol>
+    <symbol id="icon-layers" viewBox="0 0 24 24">
+      <path d="m12 3 9 5-9 5-9-5 9-5z"></path>
+      <path d="m3 12 9 5 9-5"></path>
+      <path d="m3 16 9 5 9-5"></path>
+    </symbol>
+    <symbol id="icon-check" viewBox="0 0 24 24">
+      <path d="M20 6 9 17l-5-5"></path>
+    </symbol>
+    <symbol id="icon-calendar" viewBox="0 0 24 24">
+      <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+      <path d="M16 2v4"></path>
+      <path d="M8 2v4"></path>
+      <path d="M3 10h18"></path>
+    </symbol>
+    <symbol id="icon-video" viewBox="0 0 24 24">
+      <rect x="3" y="6" width="13" height="12" rx="2"></rect>
+      <path d="m16 10 5-3v10l-5-3z"></path>
+    </symbol>
+    <symbol id="icon-edit" viewBox="0 0 24 24">
+      <path d="M12 20h9"></path>
+      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+    </symbol>
+    <symbol id="icon-star" viewBox="0 0 24 24">
+      <path d="m12 3 2.8 5.68L21 9.6l-4.5 4.39L17.6 21 12 18.05 6.4 21l1.1-7.01L3 9.6l6.2-.92Z"></path>
+    </symbol>
+    <symbol id="icon-clipboard" viewBox="0 0 24 24">
+      <rect x="8" y="3" width="8" height="4" rx="1"></rect>
+      <path d="M16 5h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h3"></path>
+    </symbol>
+    <symbol id="icon-message" viewBox="0 0 24 24">
+      <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"></path>
+    </symbol>
+  </svg>
+
+  <header class="hero">
+    <div class="container">
+      <div class="topbar">
+        <div class="brand">
+          <span class="brand-dot"></span>
+          Webinar Ketenagakerjaan
+        </div>
+        <span id="apiStatus" class="status waiting">Mengecek...</span>
+      </div>
+
+      <div class="hero-wrap">
+        <div class="hero-copy">
+          <span class="hero-label">Pendaftaran & Kehadiran Webinar</span>
+          <h1 class="hero-title">KADER NORMA KERJA : KERJA SEHAT, HUBUNGAN ERAT, PRODUKTIVITAS HEBAT</h1>
+
+          <div class="hero-info-grid">
+            <div class="hero-info-card">
+              <span class="hero-info-label">Tema</span>
+              <span class="hero-info-value">Kader Norma Kerja</span>
+            </div>
+            <div class="hero-info-card">
+              <span class="hero-info-label">Jadwal Webinar</span>
+              <span class="hero-info-value">Selasa, 19 Mei 2026 • 08.30 s.d 11.15 WIB</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main-shell">
+    <section class="form-shell">
+      <div class="shell-head">
+        <div class="shell-copy">
+          <span class="shell-subtitle">Layanan Webinar</span>
+          <h2>Formulir Peserta</h2>
+        </div>
+
+        <div class="flow-status" id="flowStatus">Siap menerima pendaftaran peserta</div>
+
+        <div class="tab-switch" role="tablist" aria-label="Pilih formulir webinar">
+          <button class="tab-btn active" data-tab="pendaftaran" type="button" role="tab" aria-selected="true" aria-controls="tab-pendaftaran">
+            <svg class="tab-icon" aria-hidden="true"><use href="#icon-clipboard"></use></svg>
+            <span>Pendaftaran</span>
+          </button>
+          <button class="tab-btn" data-tab="kehadiran" type="button" role="tab" aria-selected="false" aria-controls="tab-kehadiran">
+            <svg class="tab-icon" aria-hidden="true"><use href="#icon-check"></use></svg>
+            <span>Kehadiran</span>
+          </button>
+        </div>
+      </div>
+
+      <section id="tab-pendaftaran" class="tab-content active" role="tabpanel">
+        <div class="form-card">
+          <div class="card-top">
+            <div class="card-title">
+              <span class="card-badge">
+                <svg aria-hidden="true"><use href="#icon-star"></use></svg>
+                Pendaftaran
+              </span>
+              <h3>Pendaftaran Webinar Ketenagakerjaan</h3>
+            </div>
+
+            <div class="event-pills">
+              <div class="event-pill">
+                <svg class="event-icon" aria-hidden="true"><use href="#icon-video"></use></svg>
+                <div><strong>Media</strong><span>Zoom Meeting</span></div>
+              </div>
+              <div class="event-pill">
+                <svg class="event-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg>
+                <div><strong>Tanggal</strong><span>19 Mei 2026</span></div>
+              </div>
+            </div>
+          </div>
+
+          <form id="registrationForm" class="form-grid">
+            <div class="form-group full">
+              <label for="regFullName">
+                <svg class="label-icon" aria-hidden="true"><use href="#icon-user"></use></svg>
+                Nama lengkap
+              </label>
+              <input type="text" id="regFullName" name="fullName" placeholder="Tulis nama lengkap peserta" required />
+            </div>
+
+            <div class="form-group">
+              <label for="regOrganization">
+                <svg class="label-icon" aria-hidden="true"><use href="#icon-building"></use></svg>
+                Instansi/Perusahaan
+              </label>
+              <input type="text" id="regOrganization" name="organization" placeholder="Contoh: PT Maju Bersama" required />
+            </div>
+
+            <div class="form-group">
+              <label for="regPosition">
+                <svg class="label-icon" aria-hidden="true"><use href="#icon-briefcase"></use></svg>
+                Jabatan
+              </label>
+              <input type="text" id="regPosition" name="position" placeholder="Contoh: Staff HRD" required />
+            </div>
+
+            <div class="form-group">
+              <label for="regCity">
+                <svg class="label-icon" aria-hidden="true"><use href="#icon-map"></use></svg>
+                Kabupaten/Kota
+              </label>
+              <input type="text" id="regCity" name="city" placeholder="Contoh: Surabaya" required />
+            </div>
+
+            <div class="form-group">
+              <label for="regWhatsapp">
+                <svg class="label-icon" aria-hidden="true"><use href="#icon-phone"></use></svg>
+                Nomor WhatsApp aktif
+              </label>
+              <input
+                type="text"
+                id="regWhatsapp"
+                name="whatsapp"
+                inputmode="numeric"
+                autocomplete="tel"
+                placeholder="08xxxxxxxxxx / 628xxxxxxxxxx"
+                required
+              />
+            
+            </div>
+
+            <div class="form-group">
+              <label for="regEmail">
+                <svg class="label-icon" aria-hidden="true"><use href="#icon-mail"></use></svg>
+                Alamat email aktif
+              </label>
+              <input type="email" id="regEmail" name="email" placeholder="nama@email.com" required />
+            </div>
+
+            <div class="form-group">
+              <label for="regCategory">
+                <svg class="label-icon" aria-hidden="true"><use href="#icon-layers"></use></svg>
+                Kategori peserta
+              </label>
+              <select id="regCategory" name="participantCategory" required>
+                <option value="">-- Pilih kategori --</option>
+                <option value="Perusahaan">Perusahaan</option>
+                <option value="HRD/Personalia">HRD/Personalia</option>
+                <option value="Kader Norma Kerja">Kader Norma Kerja</option>
+                <option value="Serikat Pekerja/Serikat Buruh">Serikat Pekerja/Serikat Buruh</option>
+                <option value="Pemerintah Daerah">Pemerintah Daerah</option>
+                <option value="Akademisi">Akademisi</option>
+                <option value="Mahasiswa">Mahasiswa</option>
+                <option value="Umum">Umum</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="regPreviousWebinar">
+                <svg class="label-icon" aria-hidden="true"><use href="#icon-check"></use></svg>
+                Pernah mengikuti webinar ketenagakerjaan sebelumnya
+              </label>
+              <select id="regPreviousWebinar" name="previousWebinar" required>
+                <option value="">-- Pilih --</option>
+                <option value="Pernah">Pernah</option>
+                <option value="Belum pernah">Belum pernah</option>
+              </select>
+            </div>
+
+            <div class="form-group full">
+              <label for="regTopicQuestion">
+                <svg class="label-icon" aria-hidden="true"><use href="#icon-message"></use></svg>
+                Pertanyaan atau topik yang ingin disampaikan kepada narasumber
+              </label>
+              <textarea id="regTopicQuestion" name="topicQuestion" rows="5" placeholder="Tulis pertanyaan, isu, atau topik yang ingin dibahas"></textarea>
+            </div>
+
+            <div class="form-group full">
+              <div class="submit-row">
+                <button type="submit" id="registrationSubmitBtn" class="btn-primary">Kirim Pendaftaran</button>
+                <span class="secure-note">Data akan dikirim ke database webinar secara otomatis.</span>
+              </div>
+            </div>
+
+            <div class="form-group full">
+              <div id="registrationMessage" class="message hidden"></div>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section id="tab-kehadiran" class="tab-content" role="tabpanel">
+        <div class="form-card">
+          <div class="card-top">
+            <div class="card-title">
+              <span class="card-badge">
+                <svg aria-hidden="true"><use href="#icon-check"></use></svg>
+                Kehadiran
+              </span>
+              <h3>Daftar Hadir Webinar Ketenagakerjaan</h3>
+            </div>
+
+            <div class="event-pills">
+              <div class="event-pill">
+                <svg class="event-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg>
+                <div><strong>Waktu</strong><span>08.30 s.d 11.15</span></div>
+              </div>
+              <div class="event-pill">
+                <svg class="event-icon" aria-hidden="true"><use href="#icon-video"></use></svg>
+                <div><strong>Media</strong><span>Zoom Meeting</span></div>
+              </div>
+            </div>
+          </div>
+
+          <form id="attendanceForm" class="form-grid">
+            <div class="form-group full">
+              <label for="attFullName">
+                <svg class="label-icon" aria-hidden="true"><use href="#icon-user"></use></svg>
+                Nama lengkap (sesuai penulisan pada sertifikat)
+              </label>
+              <input type="text" id="attFullName" name="fullName" placeholder="Tulis nama lengkap peserta" required />
+            </div>
+
+            <div class="form-group">
+              <label for="attOrganization">
+                <svg class="label-icon" aria-hidden="true"><use href="#icon-building"></use></svg>
+                Instansi/Perusahaan
+              </label>
+              <input type="text" id="attOrganization" name="organization" placeholder="Contoh: PT Maju Bersama" required />
+            </div>
+
+            <div class="form-group">
+              <label for="attPosition">
+                <svg class="label-icon" aria-hidden="true"><use href="#icon-briefcase"></use></svg>
+                Jabatan
+              </label>
+              <input type="text" id="attPosition" name="position" placeholder="Contoh: Supervisor" required />
+            </div>
+
+            <div class="form-group">
+              <label for="attEmail">
+                <svg class="label-icon" aria-hidden="true"><use href="#icon-mail"></use></svg>
+                Alamat email aktif
+              </label>
+              <input type="email" id="attEmail" name="email" placeholder="nama@email.com" required />
+            </div>
+
+            <div class="form-group">
+              <label for="attWhatsapp">
+                <svg class="label-icon" aria-hidden="true"><use href="#icon-phone"></use></svg>
+                Nomor WhatsApp aktif
+              </label>
+              <input
+                type="text"
+                id="attWhatsapp"
+                name="whatsapp"
+                inputmode="numeric"
+                autocomplete="tel"
+                placeholder="08xxxxxxxxxx / 628xxxxxxxxxx"
+                required
+              />
+             
+            </div>
+
+            <div class="form-group full">
+              <label for="attRating">
+                <svg class="label-icon" aria-hidden="true"><use href="#icon-star"></use></svg>
+                Penilaian terhadap pelaksanaan webinar
+              </label>
+              <select id="attRating" name="webinarRating" required>
+                <option value="">-- Pilih penilaian --</option>
+                <option value="Sangat baik">Sangat baik</option>
+                <option value="Baik">Baik</option>
+                <option value="Cukup">Cukup</option>
+                <option value="Perlu perbaikan">Perlu perbaikan</option>
+              </select>
+            </div>
+
+            <div class="form-group full">
+              <label for="attSuggestion">
+                <svg class="label-icon" aria-hidden="true"><use href="#icon-edit"></use></svg>
+                Masukan atau saran
+              </label>
+              <textarea id="attSuggestion" name="suggestion" rows="5" placeholder="Tulis masukan, saran, atau evaluasi webinar"></textarea>
+            </div>
+
+            <div class="form-group full">
+              <div class="submit-row">
+                <button type="submit" id="attendanceSubmitBtn" class="btn-primary">Kirim Kehadiran</button>
+                <span class="secure-note">Data kehadiran akan diproses untuk kebutuhan verifikasi panitia.</span>
+              </div>
+            </div>
+
+            <div class="form-group full">
+              <div id="attendanceMessage" class="message hidden"></div>
+            </div>
+          </form>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxN-KTQ28RrCGmmTl7CWJddJ7s1bHJV6XXC0HK8PyAW9t9vONc_ypLePWseYkfoahobKw/exec';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initTabs();
+      checkApiStatus();
+      initRegistrationForm();
+      initAttendanceForm();
+      initPhoneInputs();
+    });
+
+    function activateTab(target) {
+      const buttons = document.querySelectorAll('.tab-btn');
+      const tabs = document.querySelectorAll('.tab-content');
+
+      buttons.forEach(btn => {
+        const isActive = btn.dataset.tab === target;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      });
+
+      tabs.forEach(tab => {
+        tab.classList.toggle('active', tab.id === `tab-${target}`);
+      });
+    }
+
+    function setFlowStatus(text, isSuccess = false) {
+      const flowStatus = document.getElementById('flowStatus');
+      if (!flowStatus) return;
+
+      flowStatus.textContent = text;
+      flowStatus.classList.toggle('is-success', isSuccess);
+    }
+
+    function initTabs() {
+      const buttons = document.querySelectorAll('.tab-btn');
+
+      buttons.forEach(button => {
+        button.addEventListener('click', () => {
+          activateTab(button.dataset.tab);
+
+          if (button.dataset.tab === 'pendaftaran') {
+            setFlowStatus('Siap menerima pendaftaran peserta');
+          } else {
+            setFlowStatus('Siap menerima konfirmasi kehadiran peserta');
+          }
+        });
+      });
+    }
+
+    async function checkApiStatus() {
+      const apiStatus = document.getElementById('apiStatus');
+
+      try {
+        const response = await fetch(`${API_URL}?action=ping`);
+        const result = await response.json();
+
+        if (result.success) {
+          apiStatus.textContent = 'Online';
+          apiStatus.className = 'status online';
+        } else {
+          apiStatus.textContent = 'Offline';
+          apiStatus.className = 'status offline';
+        }
+      } catch (error) {
+        apiStatus.textContent = 'Tidak terhubung';
+        apiStatus.className = 'status offline';
+      }
+    }
+
+    function initRegistrationForm() {
+      const form = document.getElementById('registrationForm');
+      const submitBtn = document.getElementById('registrationSubmitBtn');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        setButtonLoading(submitBtn, true, 'Mengirim...');
+        hideMessage('registrationMessage');
+
+        const formData = new FormData(form);
+        const params = new URLSearchParams();
+
+        params.append('action', 'register');
+        for (const [key, value] of formData.entries()) {
+          params.append(key, value.toString().trim());
+        }
+
+        try {
+          const response = await fetch(API_URL, {
+            method: 'POST',
+            body: params
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            showMessage('registrationMessage', 'success', result.message);
+            form.reset();
+            activateTab('kehadiran');
+            setFlowStatus('Pendaftaran berhasil. Lanjutkan ke tab Kehadiran.', true);
+          } else {
+            showMessage('registrationMessage', 'error', result.message || 'Pendaftaran gagal diproses.');
+            setFlowStatus('Terjadi kendala pada pendaftaran. Silakan cek kembali.', false);
+          }
+        } catch (error) {
+          showMessage('registrationMessage', 'error', 'Terjadi kesalahan saat mengirim pendaftaran. Silakan coba lagi.');
+          setFlowStatus('Terjadi kendala pada pendaftaran. Silakan coba lagi.', false);
+        } finally {
+          setButtonLoading(submitBtn, false, 'Kirim Pendaftaran');
+        }
+      });
+    }
+
+    function initAttendanceForm() {
+      const form = document.getElementById('attendanceForm');
+      const submitBtn = document.getElementById('attendanceSubmitBtn');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        setButtonLoading(submitBtn, true, 'Mengirim...');
+        hideMessage('attendanceMessage');
+
+        const formData = new FormData(form);
+        const params = new URLSearchParams();
+
+        params.append('action', 'attendance');
+        for (const [key, value] of formData.entries()) {
+          params.append(key, value.toString().trim());
+        }
+
+        try {
+          const response = await fetch(API_URL, {
+            method: 'POST',
+            body: params
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            showMessage('attendanceMessage', 'success', result.message);
+            form.reset();
+            setFlowStatus('Kehadiran berhasil dikirim. Proses webinar siap dilanjutkan.', true);
+          } else {
+            showMessage('attendanceMessage', 'error', result.message || 'Kehadiran gagal diproses.');
+            setFlowStatus('Terjadi kendala pada konfirmasi kehadiran. Silakan cek kembali.', false);
+          }
+        } catch (error) {
+          showMessage('attendanceMessage', 'error', 'Terjadi kesalahan saat mengirim kehadiran. Silakan coba lagi.');
+          setFlowStatus('Terjadi kendala pada konfirmasi kehadiran. Silakan coba lagi.', false);
+        } finally {
+          setButtonLoading(submitBtn, false, 'Kirim Kehadiran');
+        }
+      });
+    }
+
+    function initPhoneInputs() {
+      const phoneInputs = ['regWhatsapp', 'attWhatsapp'];
+
+      phoneInputs.forEach((id) => {
+        const input = document.getElementById(id);
+        if (!input) return;
+
+        input.addEventListener('input', () => {
+          input.value = input.value.replace(/[^\d]/g, '');
+        });
+      });
+    }
+
+    function showMessage(elementId, type, text) {
+      const el = document.getElementById(elementId);
+      el.classList.remove('hidden', 'success', 'error');
+      el.classList.add(type);
+      el.textContent = text;
+    }
+
+    function hideMessage(elementId) {
+      const el = document.getElementById(elementId);
+      el.classList.add('hidden');
+      el.classList.remove('success', 'error');
+      el.textContent = '';
+    }
+
+    function setButtonLoading(button, isLoading, text) {
+      button.disabled = isLoading;
+      button.textContent = text;
+    }
+  </script>
+</body>
+</html>
