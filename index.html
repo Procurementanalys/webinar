@@ -355,6 +355,103 @@
       line-height: 1.7;
     }
 
+    .zoom-banner {
+      margin: 18px 28px 0;
+      border: 1px solid #c5ddf5;
+      background: linear-gradient(135deg, #edf6ff 0%, #f5faff 100%);
+      border-radius: 18px;
+      padding: 18px 20px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .zoom-banner-icon {
+      flex-shrink: 0;
+      width: 44px;
+      height: 44px;
+      background: #0a4d92;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .zoom-banner-icon svg { width: 24px; height: 24px; fill: #fff; }
+
+    .zoom-banner-body { flex: 1; min-width: 0; }
+
+    .zoom-banner-title {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: #0a4d92;
+      margin: 0 0 4px;
+    }
+
+    .zoom-banner-topic {
+      font-size: 15px;
+      font-weight: 700;
+      color: #10233d;
+      margin: 0 0 10px;
+      line-height: 1.5;
+    }
+
+    .zoom-banner-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 18px;
+      margin-bottom: 12px;
+    }
+
+    .zoom-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #3a5272;
+    }
+
+    .zoom-meta-item svg { width: 15px; height: 15px; flex-shrink: 0; fill: #0a4d92; }
+
+    .zoom-code-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .zoom-code-chip {
+      background: #fff;
+      border: 1px solid #c5ddf5;
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #0a4d92;
+      letter-spacing: .04em;
+    }
+
+    .zoom-join-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #0a4d92 0%, #0e7cc9 100%);
+      color: #fff;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 800;
+      padding: 11px 20px;
+      border-radius: 999px;
+      box-shadow: 0 8px 20px rgba(10,77,146,.22);
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+
+    .zoom-join-btn:hover { transform: translateY(-1px); box-shadow: 0 12px 26px rgba(10,77,146,.28); }
+    .zoom-join-btn svg { width: 16px; height: 16px; fill: #fff; }
+
     @media (max-width: 860px) {
       .info-grid,
       form,
@@ -365,6 +462,7 @@
       .page { width: min(960px, calc(100% - 14px)); margin-top: 14px; }
       .hero, .content { padding: 18px; }
       .info-grid { padding: 18px 18px 0; }
+      .zoom-banner { margin: 14px 18px 0; flex-direction: column; }
       .actions { flex-direction: column; align-items: stretch; }
       .btn { width: 100%; }
     }
@@ -401,6 +499,35 @@
         <div class="info-box">
           <span class="label">Waktu / Media</span>
           <span class="value">08.30 s.d 11.15 WIB • Zoom Meeting</span>
+        </div>
+      </div>
+
+      <!-- Undangan Zoom Meeting -->
+      <div class="zoom-banner">
+        <div class="zoom-banner-icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2.586l3.293 3.293A1 1 0 0 0 23 16V8a1 1 0 0 0-1.707-.707L18 10.586V8a2 2 0 0 0-2-2H4z"/></svg>
+        </div>
+        <div class="zoom-banner-body">
+          <p class="zoom-banner-title">🔗 Undangan Zoom Meeting — Disnakertrans Prov. Kepri</p>
+          <p class="zoom-banner-topic">Kader Norma Kerja: Kerja Sehat, Hubungan Erat, Produktivitas Hebat</p>
+          <div class="zoom-banner-meta">
+            <span class="zoom-meta-item">
+              <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/></svg>
+              Selasa, 19 Mei 2026 &nbsp;|&nbsp; 08.30 WIB
+            </span>
+            <span class="zoom-meta-item">
+              <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+              Via Zoom Meeting
+            </span>
+          </div>
+          <div class="zoom-code-row">
+            <span class="zoom-code-chip">ID Rapat: 998 5586 7586</span>
+            <span class="zoom-code-chip">Kode Sandi: 979289</span>
+          </div>
+          <a class="zoom-join-btn" href="https://telkomsel.zoom.us/j/99855867586?pwd=nxtz72AwnXHTxcklKfKzDMwa1UuLDw.1" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24"><path d="M4 6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2.586l3.293 3.293A1 1 0 0 0 23 16V8a1 1 0 0 0-1.707-.707L18 10.586V8a2 2 0 0 0-2-2H4z"/></svg>
+            Bergabung ke Zoom
+          </a>
         </div>
       </div>
 
